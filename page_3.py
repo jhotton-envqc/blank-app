@@ -12,11 +12,11 @@ import openpyxl
 
 #t.title("This is the title page 3")
 
-st.markdown("# Page 3 🎉")
-st.sidebar.markdown("# Page 3 🎉")
+st.markdown("# Calculateur de l'indice acoustique Lden")
+st.sidebar.markdown("# Lden")
 
 # Titre et description de l'application
-st.title("Calculateur de l'indice acoustique Lden")
+##st.title("Calculateur de l'indice acoustique Lden")
 st.write("""
 Cette application calcule l'indice Lden à partir d'un fichier Excel. 
 Votre fichier doit contenir deux colonnes: une pour l'heure (format hh:mm:ss) et une pour le niveau acoustique LAeq (en dB). Les données doivent commencer à la deuxième ligne.
@@ -82,3 +82,4 @@ if uploaded_file is not None:
         
     except Exception as e:
         st.error(f"Une erreur s'est produite lors du traitement du fichier : {e}")
+
