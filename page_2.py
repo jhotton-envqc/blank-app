@@ -37,8 +37,6 @@ html_code = """
 </xml><![endif]-->
 </head> 
     <body style="background-color: #202124;">
-        <h1 style=color:#FFF; >CalcDB</h1>
-        <h2 style=color:#FFF;>Calculatrice de décibels</h2>
         <!-- Addition -->
         <form>
             <table>
@@ -249,3 +247,4 @@ html_code = """
 
 """
 st.components.v1.html(html_code, height=800)
+
