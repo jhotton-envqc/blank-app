@@ -11,7 +11,7 @@ import streamlit as st
 st.markdown("# Calculatrice de décibels")
 st.sidebar.markdown("# Calculatrice de décibels")
 st.sidebar.write("Équation pour l'addition de décibels:")
-st.sidebar.image("static/add.png", use_column_width=True)
+st.sidebar.image("static/add.png", use_container_width=True)
 # =============================================================================
 
 
@@ -249,6 +249,7 @@ html_code = """
 
 """
 st.components.v1.html(html_code, height=600, width=300)
+
 
 
 
