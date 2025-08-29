@@ -246,7 +246,8 @@ html_code = """
     </html>
 
 """
-st.components.v1.html(html_code, height=600, width=400)
+st.components.v1.html(html_code, height=600, width=300)
+
 
 
 
