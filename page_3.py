@@ -28,14 +28,17 @@ uploaded_file = st.file_uploader("Veuillez choisir un fichier Excel", type=["xls
 if uploaded_file is not None:
     try:
         # Lecture du fichier Excel en ignorant la première ligne
-        df = pd.read_excel(uploaded_file, header=1)
+        df = pd.read_excel(uploaded_file, header=0)
         
         # Renommer les colonnes pour la clarté si nécessaire
-        df.columns = ["Heure", "LAeq"]
+        ##df.columns = ["Heure", "LAeq"]
+        df.columns.values[0] = 'Heure'
+        df.columns.values[1] = 'LAeq'
         
         st.write("Aperçu des données chargées:")
-        st.dataframe(df.head())
+        st.dataframe(df)#.head()
 
+        
         # Vérification des colonnes nécessaires
         if "Heure" in df.columns and "LAeq" in df.columns:
             # Assurer que la colonne 'Heure' est de type datetime pour extraire les heures
@@ -76,11 +79,6 @@ if uploaded_file is not None:
 
         else:
             st.error("Erreur : Le fichier ne contient pas les colonnes requises ou leur format est incorrect.")
-
+        
     except Exception as e:
         st.error(f"Une erreur s'est produite lors du traitement du fichier : {e}")
-
-
-
-
-
