@@ -8,6 +8,7 @@ Created on Thu Aug 28 09:59:43 2025
 import streamlit as st
 import pandas as pd
 import numpy as np
+import openpyxl
 
 #t.title("This is the title page 3")
 
@@ -78,6 +79,7 @@ if uploaded_file is not None:
 
     except Exception as e:
         st.error(f"Une erreur s'est produite lors du traitement du fichier : {e}")
+
 
 
 
