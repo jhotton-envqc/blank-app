@@ -8,8 +8,8 @@ Created on Thu Aug 28 09:56:25 2025
 import streamlit as st
 
 # =============================================================================
-st.markdown("# Calculatrice de décibels ❄️")
-st.sidebar.markdown("# Calculatrice de décibels ❄️")
+st.markdown("# Calculatrice de décibels")
+st.sidebar.markdown("# Calculatrice de décibels")
 # =============================================================================
 
 
@@ -247,6 +247,7 @@ html_code = """
 
 """
 st.components.v1.html(html_code, height=600, width=300)
+
 
 
 
