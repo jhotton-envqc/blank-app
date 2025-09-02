@@ -35,6 +35,7 @@ if uploaded_file:
 
     # Options supplémentaires
     kmh = st.checkbox("Vitesse en km/h")
+    titre_on = st.checkbox("inscrire titre du graphique")
     transparent_bg = st.checkbox("Fond transparent")
     download_image = st.checkbox("Télécharger l'image")
 
@@ -53,7 +54,7 @@ if uploaded_file:
         yticks = mtick.FormatStrFormatter(fmt)
         ax.yaxis.set_major_formatter(yticks)
         
-        ax.set_title("Direction des vents mesurées de {0} à {1}".format(str(df[time_col][0]),str(df[time_col].iloc[-1])))
+        if titre_on: ax.set_title("Direction des vents mesurées de {0} à {1}".format(str(df[time_col][0]),str(df[time_col].iloc[-1])))
 
         # Affichage du graphique
         st.pyplot(fig)
