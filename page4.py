@@ -34,7 +34,7 @@ if uploaded_file:
     wind_dir_col = st.selectbox("Sélectionnez la colonne de direction du vent", df.columns)
 
     # Options supplémentaires
-    kmh = st.checkbox("Vitesse en km/h")
+    kmh = st.sidebar.checkbox("Vitesse en km/h")
     titre_on = st.checkbox("inscrire titre du graphique")
     transparent_bg = st.checkbox("Fond transparent")
     download_image = st.checkbox("Télécharger l'image")
