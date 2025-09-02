@@ -17,9 +17,9 @@ st.title("Rose des vents")
 # Options supplémentaires
 st.sidebar.write("Options")
 kmh = st.sidebar.checkbox("Vitesse en km/h")
-titre_on = st.checkbox("inscrire titre du graphique")
-transparent_bg = st.checkbox("Fond transparent")
-download_image = st.checkbox("Télécharger l'image")
+titre_on = st.sidebar.checkbox("inscrire titre du graphique")
+transparent_bg = st.sidebar.checkbox("Fond transparent")
+download_image = st.sidebar.checkbox("Télécharger l'image")
 
 # Chargement du fichier de données
 uploaded_file = st.file_uploader("Téléversez un fichier CSV ou Excel", type=["csv", "xlsx"])
