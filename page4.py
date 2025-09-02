@@ -14,6 +14,12 @@ import io
 
 # Titre de la page
 st.title("Rose des vents")
+# Options supplémentaires
+st.sadebar.write("Options")
+kmh = st.sidebar.checkbox("Vitesse en km/h")
+titre_on = st.checkbox("inscrire titre du graphique")
+transparent_bg = st.checkbox("Fond transparent")
+download_image = st.checkbox("Télécharger l'image")
 
 # Chargement du fichier de données
 uploaded_file = st.file_uploader("Téléversez un fichier CSV ou Excel", type=["csv", "xlsx"])
@@ -34,10 +40,10 @@ if uploaded_file:
     wind_dir_col = st.selectbox("Sélectionnez la colonne de direction du vent", df.columns)
 
     # Options supplémentaires
-    kmh = st.sidebar.checkbox("Vitesse en km/h")
-    titre_on = st.checkbox("inscrire titre du graphique")
-    transparent_bg = st.checkbox("Fond transparent")
-    download_image = st.checkbox("Télécharger l'image")
+    ##kmh = st.sidebar.checkbox("Vitesse en km/h")
+    ##titre_on = st.checkbox("inscrire titre du graphique")
+    ##transparent_bg = st.checkbox("Fond transparent")
+    ##download_image = st.checkbox("Télécharger l'image")
 
     # Tracer la rose des vents
     if st.button("Tracer la rose des vents"):
