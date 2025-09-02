@@ -15,7 +15,7 @@ import io
 # Titre de la page
 st.title("Rose des vents")
 # Options supplémentaires
-st.sadebar.write("Options")
+st.sidebar.write("Options")
 kmh = st.sidebar.checkbox("Vitesse en km/h")
 titre_on = st.checkbox("inscrire titre du graphique")
 transparent_bg = st.checkbox("Fond transparent")
