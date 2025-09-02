@@ -12,12 +12,13 @@ import time
 
 
 # Define the pages
-main_page = st.Page("main.py", title="Accueil", icon="🎈")
-page_2 = st.Page("page_2.py", title="Calculatrice de décibels", icon="❄️")
-page_3 = st.Page("page_3.py", title="Calculateur de Lden", icon="🎉")
+main_page = st.Page("main.py", title="Accueil")
+page_2 = st.Page("page_2.py", title="Calculatrice décibels")
+page_3 = st.Page("page_3.py", title="Calcul Lden")
+page_4 = st.Page("page4.py", title="Rose des vents")
 
 # Set up navigation
-pg = st.navigation([main_page, page_2, page_3])
+pg = st.navigation([main_page, page_2, page_3,page_4])
 
 # Run the selected page
 pg.run()
