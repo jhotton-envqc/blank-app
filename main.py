@@ -11,5 +11,5 @@ import streamlit as st
 
 # Main page content
 st.markdown("# Page d'accueil")
-st.write("Cette page est un prototype d'essai...")
+st.write("Cette page est un prototype d'essai... \n pour info: julien.hotton@environnement.gouv.qc.ca")
 st.sidebar.markdown("# 🎈 Page d'accueil 🎈")
