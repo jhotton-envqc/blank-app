@@ -10,5 +10,6 @@ import streamlit as st
 #st.title("This is the title main page")
 
 # Main page content
-st.markdown("# Main page 🎈")
-st.sidebar.markdown("# Main page 🎈")
+st.markdown("# Page d'accueil")
+st.write("Cette page est un prototype d'essai...")
+st.sidebar.markdown("# 🎈 Page d'accueil 🎈")
