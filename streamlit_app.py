@@ -16,7 +16,7 @@ main_page = st.Page("main.py", title="Accueil")
 page_2 = st.Page("page_2.py", title="Calculatrice décibels")
 page_3 = st.Page("page_3.py", title="Calcul Lden")
 page_4 = st.Page("page4.py", title="Rose des vents")
-page_5 = st.Page("page5.py", title="comparaison scipy.io.wavfile vs soudfile")
+#page_5 = st.Page("page5.py", title="comparaison scipy.io.wavfile vs soudfile")
 
 # Set up navigation
 pg = st.navigation([main_page, page_2, page_3,page_4,page_5])
