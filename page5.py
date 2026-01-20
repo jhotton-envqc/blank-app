@@ -278,12 +278,21 @@ if uploaded_file:
     # ------------------------------------------------------------
     # Téléchargement PNG (toujours visible)
     # ------------------------------------------------------------
+
+    from zoneinfo import ZoneInfo
+    
+    # ...
     buffer = BytesIO()
     fig.savefig(buffer, format="png")
+    
+    # Utiliser l'heure du Québec (EST/EDT)
+    now_local = datetime.now(ZoneInfo("America/Toronto"))
     st.sidebar.download_button(
         label="📥 Télécharger l’image (.png)",
         data=buffer.getvalue(),
-        file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
+        file_name=f"traces_{now_local.strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
         mime="image/png"
     )
+
+
 
