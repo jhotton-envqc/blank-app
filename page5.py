@@ -55,7 +55,7 @@ with st.sidebar.expander("⚙️ Options d’affichage"):
 # ------------------------------------------------------------
 # TÉLÉCHARGEMENT (toujours visible)
 # ------------------------------------------------------------
-st.sidebar.markdown("### 📥 Télécharger le graphique")
+#st.sidebar.markdown("### 📥 Télécharger le graphique")
 
 
 # ------------------------------------------------------------
@@ -286,3 +286,4 @@ if uploaded_file:
         file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
         mime="image/png"
     )
+
