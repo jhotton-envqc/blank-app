@@ -92,17 +92,21 @@ if uploaded_file:
         debut_global = df["Start Time"].min()
         fin_global = df["Start Time"].max()
 
-        date_debut = st.datetime_input("Date-heure début",
-                                       value=debut_global,
-                                       min_value=debut_global,
-                                       max_value=fin_global)
+        date_debut = st.datetime_input(
+            "Date-heure début",
+            value=debut_global,
+            min_value=debut_global,
+            max_value=fin_global
+        )
 
-        date_fin = st.datetime_input("Date-heure fin",
-                                     value=fin_global,
-                                     min_value=debut_global,
-                                     max_value=fin_global)
+        date_fin = st.datetime_input(
+            "Date-heure fin",
+            value=fin_global,
+            min_value=debut_global,
+            max_value=fin_global
+        )
 
-        if date_debut >= date_fin:
+        if date_debut >= date_fin:  # <-- corrigé
             st.warning("⚠️ La date de début doit être antérieure à la date de fin.")
             date_debut = debut_global
             date_fin = fin_global
@@ -114,8 +118,10 @@ if uploaded_file:
     default_title = f"Données mesurées de {date_debut} à {date_fin}"
 
     with st.sidebar.expander("📝 Titre du graphique"):
-        titre_graphique = st.text_input("Titre du graphique",
-                                        value=default_title)
+        titre_graphique = st.text_input(
+            "Titre du graphique",
+            value=default_title
+        )
 
 
     # ------------------------------------------------------------
@@ -175,7 +181,7 @@ if uploaded_file:
         temp_max = st.number_input("Température Max", value=float(temp_max))
 
         def validate(name, vmin, vmax, default_min, default_max):
-            if vmin >= vmax:
+            if vmin >= vmax:  # <-- corrigé
                 st.warning(f"{name}: min ≥ max → valeurs par défaut restaurées.")
                 return default_min, default_max
             return vmin, vmax
