@@ -9,9 +9,9 @@ from datetime import datetime
 
 st.set_page_config(page_title="Multi-Trace", layout="wide")
 
-# ----------------------------
-# Fonctions
-# ----------------------------
+# ------------------------------------------------------------
+# FONCTIONS
+# ------------------------------------------------------------
 
 def calculate_mean_direction_and_sigma_theta(wind_directions):
     wind_directions_rad = np.radians(wind_directions - 270)
@@ -31,40 +31,42 @@ def compute_wind_vectors(df):
     return pd.DataFrame(results, columns=["Start Time", "MeanWindSpeed", "MeanWindDirection", "SigmaTheta"])
 
 
-
-# ----------------------------
-# Interface principale
-# ----------------------------
+# ------------------------------------------------------------
+# INTERFACE PRINCIPALE
+# ------------------------------------------------------------
 
 st.title("📈 Multi-Trace")
 
 uploaded_file = st.file_uploader("Sélectionner un fichier Excel", type=["xlsx"])
 
-
 # ------------------------------------------------------------
 # SIDEBAR : OPTIONS D’AFFICHAGE
 # ------------------------------------------------------------
-with st.sidebar:
-    with st.expander("⚙️ Options d’affichage"):
-        wind = st.checkbox("Afficher vitesse du vent", True)
-        kmh = st.checkbox("Afficher vent en km/h ?", True)
-        direction = st.checkbox("Afficher direction du vent", True)
-        dirlabel = st.checkbox("Afficher étiquettes direction", False)
-        celcius = st.checkbox("Afficher Température", True)
-        HR = st.checkbox("Afficher Humidité relative", True)
-        download_graph = st.checkbox("Activer téléchargement du graphique")
+with st.sidebar.expander("⚙️ Options d’affichage"):
+    wind = st.checkbox("Afficher vitesse du vent", True)
+    kmh = st.checkbox("Afficher vent en km/h ?", True)
+    direction = st.checkbox("Afficher direction du vent", True)
+    dirlabel = st.checkbox("Afficher étiquettes direction", False)
+    celcius = st.checkbox("Afficher Température", True)
+    HR = st.checkbox("Afficher Humidité relative", True)
+    download_graph = st.checkbox("Activer téléchargement du graphique")
 
 
+# Si fichier chargé
 if uploaded_file:
 
-    # Lecture
+    # Lecture des données
     df = pd.read_excel(uploaded_file)
     df["Start Time"] = pd.to_datetime(df["Start Time"], errors="coerce")
     df = df.dropna(subset=["Start Time"])
 
+    # Vecteurs de vent
     results_df = compute_wind_vectors(df)
 
-    # Échelles automatiques
+    # ------------------------------------------------------------
+    # VALEURS AUTOMATIQUES (AFFICHAGE)
+    # ------------------------------------------------------------
+
     laeq_min_auto = float(df["LAeq"].min())
     laeq_max_auto = float(df["LAeq"].max())
 
@@ -80,60 +82,79 @@ if uploaded_file:
 
 
     # ------------------------------------------------------------
-    # SIDEBAR : CONTROLE DES ECHELLES
+    # VALEURS PAR DÉFAUT FIXES
     # ------------------------------------------------------------
 
-    with st.sidebar:
-        with st.expander("📏 Contrôle manuel des échelles"):
+    DEFAULT_LAEQ_MIN = 30
+    DEFAULT_LAEQ_MAX = 70
 
-            reset = st.button("🔄 Réinitialiser valeurs auto")
+    DEFAULT_WIND_MIN = 0
+    DEFAULT_WIND_MAX = 90    # km/h
 
-            if reset:
-                laeq_min = laeq_min_auto
-                laeq_max = laeq_max_auto
-                wind_min = wind_min_auto
-                wind_max = wind_max_auto
-                hr_min = hr_min_auto
-                hr_max = hr_max_auto
-                temp_min = temp_min_auto
-                temp_max = temp_max_auto
-            else:
-                laeq_min = laeq_min_auto
-                laeq_max = laeq_max_auto
-                wind_min = wind_min_auto
-                wind_max = wind_max_auto
-                hr_min = hr_min_auto
-                hr_max = hr_max_auto
-                temp_min = temp_min_auto
-                temp_max = temp_max_auto
+    DEFAULT_HR_MIN = 0
+    DEFAULT_HR_MAX = 100
 
-            st.markdown(f"### LAeq (auto : {laeq_min_auto:.1f} → {laeq_max_auto:.1f})")
-            laeq_min = st.number_input("LAeq Min", value=float(laeq_min))
-            laeq_max = st.number_input("LAeq Max", value=float(laeq_max))
+    DEFAULT_TEMP_MIN = -10
+    DEFAULT_TEMP_MAX = 35
 
-            st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) auto : {wind_min_auto:.1f} → {wind_max_auto:.1f}")
-            wind_min = st.number_input("Vent Min", value=float(wind_min))
-            wind_max = st.number_input("Vent Max", value=float(wind_max))
 
-            st.markdown(f"### HR (%) auto : {hr_min_auto:.1f} → {hr_max_auto:.1f}")
-            hr_min = st.number_input("HR Min", value=float(hr_min))
-            hr_max = st.number_input("HR Max", value=float(hr_max))
+    # ------------------------------------------------------------
+    # SIDEBAR : CONTROLE MANUEL DES ECHELLES
+    # ------------------------------------------------------------
+    with st.sidebar.expander("📏 Contrôle manuel des échelles"):
 
-            st.markdown(f"### Température (°C) auto : {temp_min_auto:.1f} → {temp_max_auto:.1f}")
-            temp_min = st.number_input("Temp Min", value=float(temp_min))
-            temp_max = st.number_input("Temp Max", value=float(temp_max))
+        reset = st.button("🔄 Réinitialiser valeurs par défaut")
 
-            # Validation
-            def validate(name, vmin, vmax, auto_min, auto_max):
-                if vmin >= vmax:
-                    st.warning(f"{name}: min ≥ max → valeurs auto restaurées")
-                    return auto_min, auto_max
-                return vmin, vmax
+        if reset:
+            laeq_min = DEFAULT_LAEQ_MIN
+            laeq_max = DEFAULT_LAEQ_MAX
+            wind_min = DEFAULT_WIND_MIN
+            wind_max = DEFAULT_WIND_MAX
+            hr_min = DEFAULT_HR_MIN
+            hr_max = DEFAULT_HR_MAX
+            temp_min = DEFAULT_TEMP_MIN
+            temp_max = DEFAULT_TEMP_MAX
+        else:
+            laeq_min = DEFAULT_LAEQ_MIN
+            laeq_max = DEFAULT_LAEQ_MAX
+            wind_min = DEFAULT_WIND_MIN
+            wind_max = DEFAULT_WIND_MAX
+            hr_min = DEFAULT_HR_MIN
+            hr_max = DEFAULT_HR_MAX
+            temp_min = DEFAULT_TEMP_MIN
+            temp_max = DEFAULT_TEMP_MAX
 
-            laeq_min, laeq_max = validate("LAeq", laeq_min, laeq_max, laeq_min_auto, laeq_max_auto)
-            wind_min, wind_max = validate("Vent", wind_min, wind_max, wind_min_auto, wind_max_auto)
-            hr_min, hr_max = validate("HR", hr_min, hr_max, hr_min_auto, hr_max_auto)
-            temp_min, temp_max = validate("Temp", temp_min, temp_max, temp_min_auto, temp_max_auto)
+        # --- LAeq ---
+        st.markdown(f"### LAeq (auto : {laeq_min_auto:.1f} → {laeq_max_auto:.1f})")
+        laeq_min = st.number_input("LAeq Min", value=float(laeq_min))
+        laeq_max = st.number_input("LAeq Max", value=float(laeq_max))
+
+        # --- Vent ---
+        st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) – auto : {wind_min_auto:.1f} → {wind_max_auto:.1f}")
+        wind_min = st.number_input("Vent Min", value=float(wind_min))
+        wind_max = st.number_input("Vent Max", value=float(wind_max))
+
+        # --- HR ---
+        st.markdown(f"### HR (auto : {hr_min_auto:.1f} → {hr_max_auto:.1f})")
+        hr_min = st.number_input("HR Min", value=float(hr_min))
+        hr_max = st.number_input("HR Max", value=float(hr_max))
+
+        # --- Température ---
+        st.markdown(f"### Température (auto : {temp_min_auto:.1f} → {temp_max_auto:.1f})")
+        temp_min = st.number_input("Température Min", value=float(temp_min))
+        temp_max = st.number_input("Température Max", value=float(temp_max))
+
+        # Validation
+        def validate(name, vmin, vmax, fallback_min, fallback_max):
+            if vmin >= vmax:
+                st.warning(f"{name} : min ≥ max → valeurs par défaut restaurées.")
+                return fallback_min, fallback_max
+            return vmin, vmax
+
+        laeq_min, laeq_max = validate("LAeq", laeq_min, laeq_max, DEFAULT_LAEQ_MIN, DEFAULT_LAEQ_MAX)
+        wind_min, wind_max = validate("Vent", wind_min, wind_max, DEFAULT_WIND_MIN, DEFAULT_WIND_MAX)
+        hr_min, hr_max = validate("HR", hr_min, hr_max, DEFAULT_HR_MIN, DEFAULT_HR_MAX)
+        temp_min, temp_max = validate("Température", temp_min, temp_max, DEFAULT_TEMP_MIN, DEFAULT_TEMP_MAX)
 
 
     # ------------------------------------------------------------
@@ -143,6 +164,7 @@ if uploaded_file:
     fig, ax1 = plt.subplots(figsize=(18, 10))
     ax1.grid(True)
 
+    # LAeq
     ax1.plot(df["Start Time"], df["LAeq"], color="C0")
     ax1.set_ylabel("LAeq", color="C0")
     ax1.tick_params(axis="x", rotation=55)
@@ -160,8 +182,9 @@ if uploaded_file:
             ax2.plot(df["Start Time"], df["Wind Speed avg"], color="C1")
             ax2.set_ylabel("Vent vitesse (m/s)", color="C1")
         ax2.set_ylim(wind_min, wind_max)
+        ax2.tick_params(axis="y", labelcolor="C1")
 
-    # HR
+    # Humidité relative
     if HR:
         ax3 = ax1.twinx()
         ax3.spines["right"].set_position(("outward", 40))
@@ -184,7 +207,7 @@ if uploaded_file:
 
         wind_rad = np.radians(results_df["MeanWindDirection"])
 
-        # 5% sous le max → toujours visible
+        # Position verticale des flèches : 5% sous le max
         y_arrow = laeq_max - (laeq_max - laeq_min) * 0.05
 
         ax_top.quiver(
@@ -194,7 +217,7 @@ if uploaded_file:
             np.sin(-wind_rad),
             scale_units="xy",
             scale=1,
-            width=0.003,
+            width=0.003
         )
 
         if dirlabel:
@@ -203,10 +226,10 @@ if uploaded_file:
                 ax_top.text(
                     row["row"],
                     y_label,
-                    f'{row["MeanWindDirection"] + 270:.1f}\n({row["SigmaTheta"]:.1f})',
+                    f'{row["MeanWindDirection"]+270:.1f}\n({row["SigmaTheta"]:.1f})',
                     color="red",
                     ha="center",
-                    fontsize=8,
+                    fontsize=8
                 )
 
     st.pyplot(fig)
@@ -219,5 +242,5 @@ if uploaded_file:
             label="Télécharger (.png)",
             data=buffer.getvalue(),
             file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
-            mime="image/png",
+            mime="image/png"
         )
