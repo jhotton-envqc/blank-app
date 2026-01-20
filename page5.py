@@ -31,6 +31,7 @@ def compute_wind_vectors(df):
     return pd.DataFrame(results, columns=["Start Time", "MeanWindSpeed", "MeanWindDirection", "SigmaTheta"])
 
 
+
 # ------------------------------------------------------------
 # INTERFACE PRINCIPALE
 # ------------------------------------------------------------
@@ -49,13 +50,19 @@ with st.sidebar.expander("⚙️ Options d’affichage"):
     dirlabel = st.checkbox("Afficher étiquettes direction", False)
     celcius = st.checkbox("Afficher Température", True)
     HR = st.checkbox("Afficher Humidité relative", True)
-    download_graph = st.checkbox("Activer téléchargement du graphique")
 
 
-# Si fichier chargé
+# ------------------------------------------------------------
+# SIDEBAR : TÉLÉCHARGEMENT (toujours visible)
+# ------------------------------------------------------------
+download_graph = st.sidebar.checkbox("Téléchargement du graphique (.png)", True)
+
+
+# ------------------------------------------------------------
+# SI FICHIER CHARGÉ
+# ------------------------------------------------------------
 if uploaded_file:
 
-    # Lecture des données
     df = pd.read_excel(uploaded_file)
     df["Start Time"] = pd.to_datetime(df["Start Time"], errors="coerce")
     df = df.dropna(subset=["Start Time"])
@@ -63,10 +70,7 @@ if uploaded_file:
     # Vecteurs de vent
     results_df = compute_wind_vectors(df)
 
-    # ------------------------------------------------------------
-    # VALEURS AUTOMATIQUES (AFFICHAGE)
-    # ------------------------------------------------------------
-
+    # VALEURS AUTOMATIQUES POUR AFFICHAGE
     laeq_min_auto = float(df["LAeq"].min())
     laeq_max_auto = float(df["LAeq"].max())
 
@@ -80,28 +84,54 @@ if uploaded_file:
     temp_min_auto = float(df["Amb. Temperature"].min())
     temp_max_auto = float(df["Amb. Temperature"].max())
 
+    # ------------------------------------------------------------
+    # SIDEBAR : PERIODE D’AFFICHAGE
+    # ------------------------------------------------------------
+    with st.sidebar.expander("🕒 Période d’affichage"):
+
+        debut_global = df["Start Time"].min()
+        fin_global = df["Start Time"].max()
+
+        date_debut = st.datetime_input("Date-heure début",
+                                       value=debut_global,
+                                       min_value=debut_global,
+                                       max_value=fin_global)
+
+        date_fin = st.datetime_input("Date-heure fin",
+                                     value=fin_global,
+                                     min_value=debut_global,
+                                     max_value=fin_global)
+
+        if date_debut >= date_fin:
+            st.warning("⚠️ La date de début doit être antérieure à la date de fin.")
+            date_debut = debut_global
+            date_fin = fin_global
 
     # ------------------------------------------------------------
-    # VALEURS PAR DÉFAUT FIXES
+    # SIDEBAR : TITRE PERSONNALISÉ
     # ------------------------------------------------------------
 
-    DEFAULT_LAEQ_MIN = 30
-    DEFAULT_LAEQ_MAX = 70
+    default_title = f"Données mesurées de {date_debut} à {date_fin}"
 
-    DEFAULT_WIND_MIN = 0
-    DEFAULT_WIND_MAX = 90    # km/h
-
-    DEFAULT_HR_MIN = 0
-    DEFAULT_HR_MAX = 100
-
-    DEFAULT_TEMP_MIN = -10
-    DEFAULT_TEMP_MAX = 35
+    with st.sidebar.expander("📝 Titre du graphique"):
+        titre_graphique = st.text_input("Titre du graphique",
+                                        value=default_title)
 
 
     # ------------------------------------------------------------
-    # SIDEBAR : CONTROLE MANUEL DES ECHELLES
+    # SIDEBAR : CONTROLE DES ECHELLES
     # ------------------------------------------------------------
     with st.sidebar.expander("📏 Contrôle manuel des échelles"):
+
+        # Valeurs fixes par défaut
+        DEFAULT_LAEQ_MIN = 30
+        DEFAULT_LAEQ_MAX = 70
+        DEFAULT_WIND_MIN = 0
+        DEFAULT_WIND_MAX = 90
+        DEFAULT_HR_MIN = 0
+        DEFAULT_HR_MAX = 100
+        DEFAULT_TEMP_MIN = -10
+        DEFAULT_TEMP_MAX = 35
 
         reset = st.button("🔄 Réinitialiser valeurs par défaut")
 
@@ -124,31 +154,30 @@ if uploaded_file:
             temp_min = DEFAULT_TEMP_MIN
             temp_max = DEFAULT_TEMP_MAX
 
-        # --- LAeq ---
-        st.markdown(f"### LAeq (auto : {laeq_min_auto:.1f} → {laeq_max_auto:.1f})")
+        # LAeq
+        st.markdown(f"### LAeq (données : {laeq_min_auto:.1f} → {laeq_max_auto:.1f})")
         laeq_min = st.number_input("LAeq Min", value=float(laeq_min))
         laeq_max = st.number_input("LAeq Max", value=float(laeq_max))
 
-        # --- Vent ---
-        st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) – auto : {wind_min_auto:.1f} → {wind_max_auto:.1f}")
+        # Vent
+        st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) – données : {wind_min_auto:.1f} → {wind_max_auto:.1f}")
         wind_min = st.number_input("Vent Min", value=float(wind_min))
         wind_max = st.number_input("Vent Max", value=float(wind_max))
 
-        # --- HR ---
-        st.markdown(f"### HR (auto : {hr_min_auto:.1f} → {hr_max_auto:.1f})")
+        # HR
+        st.markdown(f"### HR – données : {hr_min_auto:.1f} → {hr_max_auto:.1f}")
         hr_min = st.number_input("HR Min", value=float(hr_min))
         hr_max = st.number_input("HR Max", value=float(hr_max))
 
-        # --- Température ---
-        st.markdown(f"### Température (auto : {temp_min_auto:.1f} → {temp_max_auto:.1f})")
+        # Température
+        st.markdown(f"### Température – données : {temp_min_auto:.1f} → {temp_max_auto:.1f}")
         temp_min = st.number_input("Température Min", value=float(temp_min))
         temp_max = st.number_input("Température Max", value=float(temp_max))
 
-        # Validation
-        def validate(name, vmin, vmax, fallback_min, fallback_max):
+        def validate(name, vmin, vmax, default_min, default_max):
             if vmin >= vmax:
-                st.warning(f"{name} : min ≥ max → valeurs par défaut restaurées.")
-                return fallback_min, fallback_max
+                st.warning(f"{name}: min ≥ max → valeurs par défaut restaurées.")
+                return default_min, default_max
             return vmin, vmax
 
         laeq_min, laeq_max = validate("LAeq", laeq_min, laeq_max, DEFAULT_LAEQ_MIN, DEFAULT_LAEQ_MAX)
@@ -170,7 +199,9 @@ if uploaded_file:
     ax1.tick_params(axis="x", rotation=55)
     ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d %H:%M:%S"))
     ax1.set_ylim(laeq_min, laeq_max)
-    ax1.set_title("Données mesurées")
+    ax1.set_title(titre_graphique)
+
+    ax1.set_xlim(date_debut, date_fin)
 
     # Vent
     if wind:
@@ -182,9 +213,8 @@ if uploaded_file:
             ax2.plot(df["Start Time"], df["Wind Speed avg"], color="C1")
             ax2.set_ylabel("Vent vitesse (m/s)", color="C1")
         ax2.set_ylim(wind_min, wind_max)
-        ax2.tick_params(axis="y", labelcolor="C1")
 
-    # Humidité relative
+    # HR
     if HR:
         ax3 = ax1.twinx()
         ax3.spines["right"].set_position(("outward", 40))
@@ -207,7 +237,7 @@ if uploaded_file:
 
         wind_rad = np.radians(results_df["MeanWindDirection"])
 
-        # Position verticale des flèches : 5% sous le max
+        # Position : 5% sous le max
         y_arrow = laeq_max - (laeq_max - laeq_min) * 0.05
 
         ax_top.quiver(
@@ -238,9 +268,10 @@ if uploaded_file:
     if download_graph:
         buffer = BytesIO()
         fig.savefig(buffer, format="png")
-        st.download_button(
-            label="Télécharger (.png)",
+        st.sidebar.download_button(
+            label="📥 Télécharger l’image (.png)",
             data=buffer.getvalue(),
             file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
             mime="image/png"
         )
+``
