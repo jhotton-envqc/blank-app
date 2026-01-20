@@ -40,8 +40,12 @@ st.title("📈 Multi-Trace")
 
 uploaded_file = st.file_uploader("Sélectionner un fichier Excel", type=["xlsx"])
 
-# Options principales
-with st.expander("⚙️ Options d’affichage"):
+
+# ------------------------------------------------------------
+# SIDEBAR – OPTIONS D’AFFICHAGE
+# ------------------------------------------------------------
+
+with st.sidebar.expander("⚙️ Options d’affichage"):
     wind = st.checkbox("Afficher vent (vitesse)", value=True)
     kmh = st.checkbox("Afficher vent en km/h ?", value=True)
     direction = st.checkbox("Afficher direction du vent", value=True)
@@ -50,14 +54,15 @@ with st.expander("⚙️ Options d’affichage"):
     HR = st.checkbox("Afficher Humidité relative", value=True)
     download_graph = st.checkbox("Activer téléchargement du graphique")
 
+
 # ---------------------------------------------------------------------------------
 # LECTURE ET TRAITEMENT DU FICHIER
 # ---------------------------------------------------------------------------------
 
 if uploaded_file:
+
     df = pd.read_excel(uploaded_file)
     df["Start Time"] = pd.to_datetime(df["Start Time"])
-
     results_df = compute_wind_vectors(df)
 
     # ------------------------------------------------------------
@@ -80,63 +85,61 @@ if uploaded_file:
     temp_min_auto = float(df["Amb. Temperature"].min())
     temp_max_auto = float(df["Amb. Temperature"].max())
 
+
     # ------------------------------------------------------------
-    # EXPANDER : CONTRÔLE DES ÉCHELLES
+    # SIDEBAR – CONTROLE DES ECHELLES
     # ------------------------------------------------------------
 
-    with st.expander("📏 Contrôle manuel des échelles"):
+    with st.sidebar.expander("📏 Contrôle manuel des échelles"):
+        
+        st.markdown("Les valeurs entre parenthèses proviennent des données.")
 
-        st.markdown("Les valeurs entre parenthèses sont les valeurs automatiques calculées à partir des données.")
+        reset = st.button("🔄 Réinitialiser aux valeurs auto")
 
-        reset = st.button("🔄 Réinitialiser toutes les échelles (valeurs auto)")
-
-        # Valeurs initiales
+        # Valeurs par défaut
         laeq_min_val, laeq_max_val = laeq_min_auto, laeq_max_auto
         wind_min_val, wind_max_val = wind_min_auto, wind_max_auto
         hr_min_val, hr_max_val = hr_min_auto, hr_max_auto
         temp_min_val, temp_max_val = temp_min_auto, temp_max_auto
 
         if reset:
-            st.info("✔️ Toutes les échelles ont été réinitialisées aux valeurs automatiques.")
+            st.info("✔️ Échelles réinitialisées.")
 
         # --- LAeq ---
         st.markdown(f"### LAeq (auto : {laeq_min_auto:.1f} → {laeq_max_auto:.1f})")
         c1, c2 = st.columns(2)
-        laeq_min = c1.number_input("Échelle LAeq – Min", value=laeq_min_val)
-        laeq_max = c2.number_input("Échelle LAeq – Max", value=laeq_max_val)
+        laeq_min = c1.number_input("LAeq Min", value=laeq_min_val)
+        laeq_max = c2.number_input("LAeq Max", value=laeq_max_val)
 
         # --- Vent ---
         st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) – auto : {wind_min_auto:.1f} → {wind_max_auto:.1f}")
         c3, c4 = st.columns(2)
-        wind_min = c3.number_input("Échelle Vent – Min", value=wind_min_val)
-        wind_max = c4.number_input("Échelle Vent – Max", value=wind_max_val)
+        wind_min = c3.number_input("Vent Min", value=wind_min_val)
+        wind_max = c4.number_input("Vent Max", value=wind_max_val)
 
         # --- HR ---
         st.markdown(f"### Humidité relative (%HR) – auto : {hr_min_auto:.1f} → {hr_max_auto:.1f}")
         c5, c6 = st.columns(2)
-        hr_min = c5.number_input("Échelle HR – Min", value=hr_min_val)
-        hr_max = c6.number_input("Échelle HR – Max", value=hr_max_val)
+        hr_min = c5.number_input("HR Min", value=hr_min_val)
+        hr_max = c6.number_input("HR Max", value=hr_max_val)
 
         # --- Température ---
         st.markdown(f"### Température (°C) – auto : {temp_min_auto:.1f} → {temp_max_auto:.1f}")
         c7, c8 = st.columns(2)
-        temp_min = c7.number_input("Échelle Température – Min", value=temp_min_val)
-        temp_max = c8.number_input("Échelle Température – Max", value=temp_max_val)
+        temp_min = c7.number_input("Temp. Min", value=temp_min_val)
+        temp_max = c8.number_input("Temp. Max", value=temp_max_val)
 
-        # ------------------------------------------------------------
-        # VALIDATION DE COHERENCE
-        # ------------------------------------------------------------
-
-        def validate_scale(name, vmin, vmax, auto_min, auto_max):
+        # --- VALIDATION ---
+        def validate(name, vmin, vmax, auto_min, auto_max):
             if vmin >= vmax:
-                st.warning(f"⚠️ Échelle invalide pour {name} (min ≥ max). Valeurs auto restaurées.")
+                st.warning(f"⚠️ {name} : min ≥ max → réinitialisé")
                 return auto_min, auto_max
             return vmin, vmax
 
-        laeq_min, laeq_max = validate_scale("LAeq", laeq_min, laeq_max, laeq_min_auto, laeq_max_auto)
-        wind_min, wind_max = validate_scale("Vent", wind_min, wind_max, wind_min_auto, wind_max_auto)
-        hr_min, hr_max = validate_scale("HR", hr_min, hr_max, hr_min_auto, hr_max_auto)
-        temp_min, temp_max = validate_scale("Température", temp_min, temp_max, temp_min_auto, temp_max_auto)
+        laeq_min, laeq_max = validate("LAeq", laeq_min, laeq_max, laeq_min_auto, laeq_max_auto)
+        wind_min, wind_max = validate("Vent", wind_min, wind_max, wind_min_auto, wind_max_auto)
+        hr_min, hr_max = validate("HR", hr_min, hr_max, hr_min_auto, hr_max_auto)
+        temp_min, temp_max = validate("Température", temp_min, temp_max, temp_min_auto, temp_max_auto)
 
 
     # ------------------------------------------------------------
@@ -154,19 +157,19 @@ if uploaded_file:
     ax1.set_ylim(laeq_min, laeq_max)
     ax1.set_title("Données mesurées")
 
-    # Vent
+    # Vent vitesse
     if wind:
         ax2 = ax1.twinx()
         if kmh:
-            ax2.plot(df['Start Time'], df['Wind Speed avg'] * 3.6, color='C1')
+            ax2.plot(df["Start Time"], df["Wind Speed avg"] * 3.6, color='C1')
             ax2.set_ylabel("Vent vitesse (km/h)", color='C1')
         else:
-            ax2.plot(df['Start Time'], df['Wind Speed avg'], color='C1')
+            ax2.plot(df["Start Time"], df["Wind Speed avg"], color='C1')
             ax2.set_ylabel("Vent vitesse (m/s)", color='C1')
         ax2.set_ylim(wind_min, wind_max)
         ax2.tick_params(axis='y', labelcolor='C1')
 
-    # HR
+    # Humidité relative
     if HR:
         ax3 = ax1.twinx()
         ax3.spines['right'].set_position(('outward', 40))
@@ -202,6 +205,7 @@ if uploaded_file:
             width=0.003
         )
 
+        # étiquettes
         if dirlabel:
             y_label = y_arrow - (laeq_max - laeq_min) * 0.03
             for idx, row in results_df.iterrows():
@@ -226,3 +230,4 @@ if uploaded_file:
             file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
             mime="image/png"
         )
+``
