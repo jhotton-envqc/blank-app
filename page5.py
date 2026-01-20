@@ -280,4 +280,4 @@ if uploaded_file:
             file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
             mime="image/png"
         )
-``
+
