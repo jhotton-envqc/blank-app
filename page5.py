@@ -44,12 +44,11 @@ uploaded_file = st.file_uploader("Sélectionner un fichier Excel", type=["xlsx"]
 with st.expander("⚙️ Options d’affichage"):
     wind = st.checkbox("Afficher vent (vitesse)", value=True)
     kmh = st.checkbox("Afficher vent en km/h ?", value=True)
-    direction = st.checkbox("Affichage direction du vent", value=True)
+    direction = st.checkbox("Afficher direction du vent", value=True)
     dirlabel = st.checkbox("Afficher étiquettes direction", value=False)
     celcius = st.checkbox("Afficher Température (°C)", value=True)
     HR = st.checkbox("Afficher Humidité relative", value=True)
     download_graph = st.checkbox("Activer téléchargement du graphique")
-
 
 # ---------------------------------------------------------------------------------
 # LECTURE ET TRAITEMENT DU FICHIER
@@ -86,42 +85,40 @@ if uploaded_file:
     # ------------------------------------------------------------
 
     with st.expander("📏 Contrôle manuel des échelles"):
-        st.markdown("Vous pouvez inscrire vos propres valeurs. Les valeurs entre parenthèses indiquent celles détectées automatiquement.")
 
-        reset = st.button("🔄 Réinitialiser toutes les échelles (auto)")
+        st.markdown("Les valeurs entre parenthèses sont les valeurs automatiques calculées à partir des données.")
 
-        # Valeurs par défaut (soit auto, soit reset)
+        reset = st.button("🔄 Réinitialiser toutes les échelles (valeurs auto)")
+
+        # Valeurs initiales
+        laeq_min_val, laeq_max_val = laeq_min_auto, laeq_max_auto
+        wind_min_val, wind_max_val = wind_min_auto, wind_max_auto
+        hr_min_val, hr_max_val = hr_min_auto, hr_max_auto
+        temp_min_val, temp_max_val = temp_min_auto, temp_max_auto
+
         if reset:
-            laeq_min_val, laeq_max_val = laeq_min_auto, laeq_max_auto
-            wind_min_val, wind_max_val = wind_min_auto, wind_max_auto
-            hr_min_val, hr_max_val = hr_min_auto, hr_max_auto
-            temp_min_val, temp_max_val = temp_min_auto, temp_max_auto
-        else:
-            laeq_min_val, laeq_max_val = laeq_min_auto, laeq_max_auto
-            wind_min_val, wind_max_val = wind_min_auto, wind_max_auto
-            hr_min_val, hr_max_val = hr_min_auto, hr_max_auto
-            temp_min_val, temp_max_val = temp_min_auto, temp_max_auto
+            st.info("✔️ Toutes les échelles ont été réinitialisées aux valeurs automatiques.")
 
         # --- LAeq ---
-        st.markdown(f"### LAeq (min auto = {laeq_min_auto:.1f}, max auto = {laeq_max_auto:.1f})")
+        st.markdown(f"### LAeq (auto : {laeq_min_auto:.1f} → {laeq_max_auto:.1f})")
         c1, c2 = st.columns(2)
         laeq_min = c1.number_input("Échelle LAeq – Min", value=laeq_min_val)
         laeq_max = c2.number_input("Échelle LAeq – Max", value=laeq_max_val)
 
         # --- Vent ---
-        st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) — min auto = {wind_min_auto:.1f}, max auto = {wind_max_auto:.1f}")
+        st.markdown(f"### Vent ({'km/h' if kmh else 'm/s'}) – auto : {wind_min_auto:.1f} → {wind_max_auto:.1f}")
         c3, c4 = st.columns(2)
         wind_min = c3.number_input("Échelle Vent – Min", value=wind_min_val)
         wind_max = c4.number_input("Échelle Vent – Max", value=wind_max_val)
 
         # --- HR ---
-        st.markdown(f"### Humidité relative (%HR) — min auto = {hr_min_auto:.1f}, max auto = {hr_max_auto:.1f}")
+        st.markdown(f"### Humidité relative (%HR) – auto : {hr_min_auto:.1f} → {hr_max_auto:.1f}")
         c5, c6 = st.columns(2)
         hr_min = c5.number_input("Échelle HR – Min", value=hr_min_val)
         hr_max = c6.number_input("Échelle HR – Max", value=hr_max_val)
 
         # --- Température ---
-        st.markdown(f"### Température (°C) — min auto = {temp_min_auto:.1f}, max auto = {temp_max_auto:.1f}")
+        st.markdown(f"### Température (°C) – auto : {temp_min_auto:.1f} → {temp_max_auto:.1f}")
         c7, c8 = st.columns(2)
         temp_min = c7.number_input("Échelle Température – Min", value=temp_min_val)
         temp_max = c8.number_input("Échelle Température – Max", value=temp_max_val)
@@ -130,31 +127,17 @@ if uploaded_file:
         # VALIDATION DE COHERENCE
         # ------------------------------------------------------------
 
-        def validate_scale(name, vmin, vmax):
+        def validate_scale(name, vmin, vmax, auto_min, auto_max):
             if vmin >= vmax:
-                st.warning(f"⚠️ Valeurs invalides pour {name} (min ≥ max). Réinitialisation automatique.")
-                return None
-            return (vmin, vmax)
+                st.warning(f"⚠️ Échelle invalide pour {name} (min ≥ max). Valeurs auto restaurées.")
+                return auto_min, auto_max
+            return vmin, vmax
 
-        scales = {
-            "LAeq": validate_scale("LAeq", laeq_min, laeq_max),
-            "Vent": validate_scale("Vent", wind_min, wind_max),
-            "HR": validate_scale("HR", hr_min, hr_max),
-            "Température": validate_scale("Température", temp_min, temp_max),
-        }
+        laeq_min, laeq_max = validate_scale("LAeq", laeq_min, laeq_max, laeq_min_auto, laeq_max_auto)
+        wind_min, wind_max = validate_scale("Vent", wind_min, wind_max, wind_min_auto, wind_max_auto)
+        hr_min, hr_max = validate_scale("HR", hr_min, hr_max, hr_min_auto, hr_max_auto)
+        temp_min, temp_max = validate_scale("Température", temp_min, temp_max, temp_min_auto, temp_max_auto)
 
-        # Réassignation si validée
-        if scales["LAeq"]: laeq_min, laeq_max = scales["LAeq"]
-        else: laeq_min, laeq_max = laeq_min_auto, laeq_max_auto
-
-        if scales["Vent"]: wind_min, wind_max = scales["Vent"]
-        else: wind_min, wind_max = wind_min_auto, wind_max_auto
-
-        if scales["HR"]: hr_min, hr_max = scales["HR"]
-        else: hr_min, hr_max = hr_min_auto, hr_max_auto
-
-        if scales["Température"]: temp_min, temp_max = scales["Température"]
-        else: temp_min, temp_max = temp_min_auto, temp_max_auto
 
     # ------------------------------------------------------------
     # GRAPHIQUE
@@ -191,7 +174,7 @@ if uploaded_file:
         ax3.set_ylabel("%HR", color='C2')
         ax3.set_ylim(hr_min, hr_max)
 
-    # Temp
+    # Température
     if celcius:
         ax4 = ax1.twinx()
         ax4.spines['right'].set_position(('outward', 100))
@@ -205,9 +188,13 @@ if uploaded_file:
         ax_top = ax1.twiny()
 
         wind_rad = np.radians(results_df["MeanWindDirection"])
+
+        # position dynamique des flèches (5% sous le max)
+        y_arrow = laeq_max - (laeq_max - laeq_min) * 0.05
+
         ax_top.quiver(
             results_df["row"],
-            laeq_max,
+            y_arrow,
             np.cos(wind_rad),
             np.sin(-wind_rad),
             scale_units="xy",
@@ -216,10 +203,11 @@ if uploaded_file:
         )
 
         if dirlabel:
+            y_label = y_arrow - (laeq_max - laeq_min) * 0.03
             for idx, row in results_df.iterrows():
                 ax_top.text(
                     row["row"],
-                    laeq_max - 1,
+                    y_label,
                     f'{row["MeanWindDirection"]+270:.1f}\n({row["SigmaTheta"]:.1f})',
                     color='red',
                     ha='center',
