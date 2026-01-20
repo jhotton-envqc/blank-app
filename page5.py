@@ -53,9 +53,9 @@ with st.sidebar.expander("⚙️ Options d’affichage"):
 
 
 # ------------------------------------------------------------
-# SIDEBAR : TÉLÉCHARGEMENT (toujours visible)
+# TÉLÉCHARGEMENT (toujours visible)
 # ------------------------------------------------------------
-download_graph = st.sidebar.checkbox("Téléchargement du graphique (.png)", True)
+st.sidebar.markdown("### 📥 Télécharger le graphique")
 
 
 # ------------------------------------------------------------
@@ -70,7 +70,7 @@ if uploaded_file:
     # Vecteurs de vent
     results_df = compute_wind_vectors(df)
 
-    # VALEURS AUTOMATIQUES POUR AFFICHAGE
+    # VALEURS AUTOMATIQUES POUR INFO
     laeq_min_auto = float(df["LAeq"].min())
     laeq_max_auto = float(df["LAeq"].max())
 
@@ -84,37 +84,44 @@ if uploaded_file:
     temp_min_auto = float(df["Amb. Temperature"].min())
     temp_max_auto = float(df["Amb. Temperature"].max())
 
+
     # ------------------------------------------------------------
-    # SIDEBAR : PERIODE D’AFFICHAGE
+    # PERIODE D’AFFICHAGE (option B = limite affichage seulement)
     # ------------------------------------------------------------
     with st.sidebar.expander("🕒 Période d’affichage"):
 
         debut_global = df["Start Time"].min()
         fin_global = df["Start Time"].max()
 
-        date_debut = st.datetime_input(
-            "Date-heure début",
-            value=debut_global,
-            min_value=debut_global,
-            max_value=fin_global
-        )
+        reset_time = st.button("🔄 Réinitialiser période d'affichage")
 
-        date_fin = st.datetime_input(
-            "Date-heure fin",
-            value=fin_global,
-            min_value=debut_global,
-            max_value=fin_global
-        )
+        if reset_time:
+            date_debut = debut_global
+            date_fin = fin_global
+        else:
+            date_debut = st.datetime_input(
+                "Date-heure début",
+                value=debut_global,
+                min_value=debut_global,
+                max_value=fin_global
+            )
 
-        if date_debut >= date_fin:  # <-- corrigé
+            date_fin = st.datetime_input(
+                "Date-heure fin",
+                value=fin_global,
+                min_value=debut_global,
+                max_value=fin_global
+            )
+
+        if date_debut >= date_fin:
             st.warning("⚠️ La date de début doit être antérieure à la date de fin.")
             date_debut = debut_global
             date_fin = fin_global
 
-    # ------------------------------------------------------------
-    # SIDEBAR : TITRE PERSONNALISÉ
-    # ------------------------------------------------------------
 
+    # ------------------------------------------------------------
+    # TITRE PERSONNALISÉ
+    # ------------------------------------------------------------
     default_title = f"Données mesurées de {date_debut} à {date_fin}"
 
     with st.sidebar.expander("📝 Titre du graphique"):
@@ -125,7 +132,7 @@ if uploaded_file:
 
 
     # ------------------------------------------------------------
-    # SIDEBAR : CONTROLE DES ECHELLES
+    # CONTROLE DES ECHELLES
     # ------------------------------------------------------------
     with st.sidebar.expander("📏 Contrôle manuel des échelles"):
 
@@ -139,9 +146,9 @@ if uploaded_file:
         DEFAULT_TEMP_MIN = -10
         DEFAULT_TEMP_MAX = 35
 
-        reset = st.button("🔄 Réinitialiser valeurs par défaut")
+        reset_scales = st.button("🔄 Réinitialiser échelles")
 
-        if reset:
+        if reset_scales:
             laeq_min = DEFAULT_LAEQ_MIN
             laeq_max = DEFAULT_LAEQ_MAX
             wind_min = DEFAULT_WIND_MIN
@@ -181,7 +188,7 @@ if uploaded_file:
         temp_max = st.number_input("Température Max", value=float(temp_max))
 
         def validate(name, vmin, vmax, default_min, default_max):
-            if vmin >= vmax:  # <-- corrigé
+            if vmin >= vmax:
                 st.warning(f"{name}: min ≥ max → valeurs par défaut restaurées.")
                 return default_min, default_max
             return vmin, vmax
@@ -195,7 +202,6 @@ if uploaded_file:
     # ------------------------------------------------------------
     # GRAPHIQUE
     # ------------------------------------------------------------
-
     fig, ax1 = plt.subplots(figsize=(18, 10))
     ax1.grid(True)
 
@@ -243,7 +249,6 @@ if uploaded_file:
 
         wind_rad = np.radians(results_df["MeanWindDirection"])
 
-        # Position : 5% sous le max
         y_arrow = laeq_max - (laeq_max - laeq_min) * 0.05
 
         ax_top.quiver(
@@ -270,14 +275,14 @@ if uploaded_file:
 
     st.pyplot(fig)
 
-    # Téléchargement
-    if download_graph:
-        buffer = BytesIO()
-        fig.savefig(buffer, format="png")
-        st.sidebar.download_button(
-            label="📥 Télécharger l’image (.png)",
-            data=buffer.getvalue(),
-            file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
-            mime="image/png"
-        )
-
+    # ------------------------------------------------------------
+    # Téléchargement PNG (toujours visible)
+    # ------------------------------------------------------------
+    buffer = BytesIO()
+    fig.savefig(buffer, format="png")
+    st.sidebar.download_button(
+        label="📥 Télécharger l’image (.png)",
+        data=buffer.getvalue(),
+        file_name=f"traces_{datetime.now().strftime('%Y-%m-%d_%Hh%Mm%Ss')}.png",
+        mime="image/png"
+    )
